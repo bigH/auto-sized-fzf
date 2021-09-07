@@ -29,6 +29,14 @@ define min(a, b) { if (a < b) return a else return b }
 define max(a, b) { if (a > b) return a else return b }
 '
 
+fzf_sizer_run_bc_program() {
+  WIDTH="$(tput cols)"
+  HEIGHT="$(tput lines)"
+
+  WIDTH_SUBSTITUTED="${1//__WIDTH__/$WIDTH}"
+  echo "${FZF_SIZER_BC_STL} ${FZF_SIZER_BC_LIB} ${WIDTH_SUBSTITUTED//__HEIGHT__/$HEIGHT}" | bc -l
+}
+
 fzf_sizer_preview_window_settings() {
   IS_VERTICAL="$(fzf_sizer_run_bc_program "__WIDTH__ / __HEIGHT__ < $FZF_SIZER_VERTICAL_THRESHOLD")"
 
@@ -42,14 +50,6 @@ fzf_sizer_preview_window_settings() {
 
   # NB: round the `bc -l` result
   echo "--preview-window=$PREVIEW_DIRECTION:${PREVIEW_SIZE%%.*}%"
-}
-
-fzf_sizer_run_bc_program() {
-  WIDTH="$(tput cols)"
-  HEIGHT="$(tput lines)"
-
-  WIDTH_SUBSTITUTED="${1//__WIDTH__/$WIDTH}"
-  echo "${FZF_SIZER_BC_STL} ${FZF_SIZER_BC_LIB} ${WIDTH_SUBSTITUTED//__HEIGHT__/$HEIGHT}" | bc -l
 }
 
 fzf_sizer_hidden_preview_window_settings() {
