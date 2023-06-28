@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# -- check to see if we were sourced --
+
+(
+  [[ -n $ZSH_VERSION && $ZSH_EVAL_CONTEXT =~ :file$ ]] || 
+  [[ -n $KSH_VERSION && "$(cd -- "$(dirname -- "$0")" && pwd -P)/$(basename -- "$0")" != "$(cd -- "$(dirname -- "${.sh.file}")" && pwd -P)/$(basename -- "${.sh.file}")" ]] || 
+  [[ -n $BASH_VERSION ]] && (return 0 2>/dev/null)
+) && sourced=1 || sourced=0
+
 # -- Default configurations: --
 
 if [ -z "$FZF_SIZER_VERTICAL_THRESHOLD" ]; then
@@ -30,8 +38,8 @@ define max(a, b) { if (a > b) return a else return b }
 '
 
 fzf_sizer_run_bc_program() {
-  WIDTH="$(tput cols)"
-  HEIGHT="$(tput lines)"
+  WIDTH="${WIDTH:=$(tput cols)}"
+  HEIGHT="${HEIGHT:=$(tput lines)}"
 
   WIDTH_SUBSTITUTED="${1//__WIDTH__/$WIDTH}"
   echo "${FZF_SIZER_BC_STL} ${FZF_SIZER_BC_LIB} ${WIDTH_SUBSTITUTED//__HEIGHT__/$HEIGHT}" | bc -l
@@ -49,10 +57,13 @@ fzf_sizer_preview_window_settings() {
   fi
 
   # NB: round the `bc -l` result
-  echo "--preview-window=$PREVIEW_DIRECTION:${PREVIEW_SIZE%%.*}%"
+  echo "$PREVIEW_DIRECTION:${PREVIEW_SIZE%%.*}%"
 }
 
 fzf_sizer_hidden_preview_window_settings() {
   echo "$(fzf_sizer_preview_window_settings):hidden"
 }
 
+if [ "$sourced" -eq 0 ]; then
+  fzf_sizer_preview_window_settings
+fi
